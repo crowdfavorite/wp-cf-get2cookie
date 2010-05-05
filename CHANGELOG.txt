@@ -1,0 +1,9 @@
+# CF Get 2 Cookie Changelog
+
+## 1.0.1
+
+- Tested Successfully on WordPress 3.0.
+
+## 1.0
+
+- Initial release.
