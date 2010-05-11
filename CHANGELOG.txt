@@ -1,5 +1,9 @@
 # CF Get 2 Cookie Changelog
 
+## 1.1
+
+- Added automatic integration with the CF Context plugin
+
 ## 1.0.1
 
 - Tested Successfully on WordPress 3.0.
