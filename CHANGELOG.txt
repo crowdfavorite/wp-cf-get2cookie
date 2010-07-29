@@ -1,5 +1,9 @@
 # CF Get 2 Cookie Changelog
 
+## 1.1.1
+
+- Bug fix to only add the JS for the plugin when needed
+
 ## 1.1
 
 - Added automatic integration with the CF Context plugin
