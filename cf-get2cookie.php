@@ -3,7 +3,7 @@
 Plugin Name: CF Get2Cookie 
 Plugin URI: http://crowdfavorite.com 
 Description: Gives admin users the ability to set URL query strings for creating and deleting cookies. 
-Version: 1.0.1
+Version: 1.1.1
 Author: Crowd Favorite
 Author URI: http://crowdfavorite.com
 */
@@ -159,8 +159,10 @@ function cfg2g_save_settings($settings) {
 	return;
 }
 
-wp_enqueue_script('jquery');
-wp_enqueue_script('cfg2g_admin_js', trailingslashit(get_bloginfo('url')).'?cf_action=cfg2g_admin_js', array('jquery'));
+if (is_admin() && !empty($_GET['page']) && $_GET['page'] == basename(__FILE__)) {
+	wp_enqueue_script('jquery');
+	wp_enqueue_script('cfg2g_admin_js', trailingslashit(get_bloginfo('url')).'?cf_action=cfg2g_admin_js', array('jquery'));
+}
 
 function cfg2g_admin_js() {
 	header('Content-type: text/javascript');
@@ -369,6 +371,38 @@ function cfg2g_table_item($key, $type, $args = array()) {
 	</tr>
 	';
 	return $html;
+}
+
+// CF Context Integration
+if (function_exists('cfcn_get_context')) {
+	/**
+	 * This function adds the COOKIE context to the CF Context plugin if it exists.  This function
+	 * will only add the COOKIE's for items added by this plugin
+	 *
+	 * @param array $context - Current context items
+	 * @return array - Modified context items
+	 */
+	function cfg2g_context($context) {
+		$settings = get_option('cfg2g_settings');
+		if (is_array($_COOKIE) && !empty($_COOKIE) && is_array($settings) && !empty($settings)) {
+			$available_cookies = array();
+			foreach ($settings as $setting) {
+				if ($setting['action'] == 'add') {
+					$available_cookies[] = $setting['cookie_name'];
+				}
+			}
+			
+			if (is_array($available_cookies) && !empty($available_cookies)) {
+				foreach ($_COOKIE as $cookie_key => $cookie_value) {
+					if (in_array($cookie_key, $available_cookies)) {
+						$context[$cookie_key] = $cookie_value;
+					}
+				}
+			}
+		}
+		return $context;
+	}
+	add_filter('cfcn_context', 'cfg2g_context');
 }
 
 ?>
