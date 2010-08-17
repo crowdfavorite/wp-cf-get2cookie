@@ -3,7 +3,7 @@
 Plugin Name: CF Get2Cookie 
 Plugin URI: http://crowdfavorite.com 
 Description: Gives admin users the ability to set URL query strings for creating and deleting cookies. 
-Version: 1.1.1
+Version: 1.2
 Author: Crowd Favorite
 Author URI: http://crowdfavorite.com
 */
@@ -403,6 +403,36 @@ if (function_exists('cfcn_get_context')) {
 		return $context;
 	}
 	add_filter('cfcn_context', 'cfg2g_context');
+}
+
+// WP Super Cache Integration
+
+if (function_exists('add_cacheaction')) {
+	function cfcn_cache_key($cache_key) {
+		$settings = get_option('cfg2g_settings');
+		if (is_array($_COOKIE) && !empty($_COOKIE) && is_array($settings) && !empty($settings)) {
+			$available_cookies = array();
+			foreach ($settings as $setting) {
+				if ($setting['action'] == 'add') {
+					$available_cookies[] = $setting['cookie_name'];
+				}
+			}
+			
+			if (is_array($available_cookies) && !empty($available_cookies)) {
+				foreach ($_COOKIE as $cookie_key => $cookie_value) {
+					if (in_array($cookie_key, $available_cookies)) {
+						$cache_key .= '-'.$cookie_key.$cookie_value;
+					}
+				}
+			}
+		}
+		return $cache_key;
+	}
+	
+	function cfcn_add_cacheaction() {
+		add_cacheaction('wp_cache_get_cookies_values', 'cfcn_cache_key');
+	}
+	add_action('init', 'cfcn_add_cacheaction');
 }
 
 ?>

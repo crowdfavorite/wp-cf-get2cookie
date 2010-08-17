@@ -28,3 +28,7 @@ To add new cookie checks, navigate to the CF Get2Cookie settings page. WP-Admin-
 #### Removing Cookies From Settings
 
 To remove a cookie setting from the Addition/Removal section, click the Delete button.  The browser will prompt for confirmation to delete.  Then click the Save Settings button to save changes
+
+### WP Super Cache
+
+The plugin also has added the capability to integrate with the WP Super Cache plugin.  It integrates by adding the cookie values for a specific user's browser based on the cookies set in the plugin.  This way if specific cookies are needed to display different content on the site, they will be honored by the Super Cache plugin.
