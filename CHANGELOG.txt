@@ -1,5 +1,9 @@
 # CF Get 2 Cookie Changelog
 
+## 1.3
+
+- Added ability to leave the cookie value blank in settings, which means it will clone the value of the query parameter.
+
 ## 1.2
 
 - Added WP Super Cache Integration
