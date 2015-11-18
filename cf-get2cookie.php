@@ -58,24 +58,27 @@ function cfg2g_init() {
 	if (!is_array($settings) || empty($settings)) { return; }
 	
 	if (is_array($_GET) && !empty($_GET)) {
-		parse_str($_SERVER['QUERY_STRING'], $output);
+	    $url = $_SERVER['REQUEST_URI'];
+	    
 		$result = false;
 		foreach ($settings as $key => $setting) {
-			if (isset($_GET[$setting['url_key']]) && $_GET[$setting['url_key']] == $setting['url_value']) {
-				if ($setting['action'] == 'add') {
-					$result = setcookie($setting['cookie_name'], $setting['cookie_value'], time()+60*60*24*365, '/');
-				}
-				else {
-					$result = setcookie($setting['cookie_name'], $setting['cookie_value'], time()-60*60*24*365, '/');
-				}
-				
-				if ($result) {
-					unset($output[$setting['url_key']]);
-				}
-			}
+		    if ( isset( $_GET[ $setting['url_key'] ] ) && ( !$setting['url_value'] || $setting['url_value'] == $_GET[ $setting['url_key'] ] ) ) {
+		        $value = $_GET[ $setting['url_key'] ];
+		        
+		        if ( 'add' == $setting['action'] ) {
+		            $result = setcookie( $setting['cookie_name'], $value, strtotime( '+1 year', time() ) );
+		        }
+		        else {
+		            // Expire the cookie
+		            $result = setcookie( $setting['cookie_name'], null, -1 );
+		        }
+		        
+		        $url = remove_query_arg( $setting['url_key'], $url );
+		    }
 		}
-		if ($result) {
-			wp_redirect(trim(get_bloginfo('url').substr_replace($_SERVER['REQUEST_URI'], http_build_query($output), strpos($_SERVER['REQUEST_URI'], '?')+1), '?'));
+		
+		if ( $result ) {
+			wp_safe_redirect( $url );
 			exit();
 		}
 	}
@@ -128,7 +131,7 @@ function cfg2g_save_settings($settings) {
 	// Process the Add Rows
 	if (is_array($settings['add']) && !empty($settings['add'])) {
 		foreach ($settings['add'] as $key => $setting) {
-			if (!empty($setting['url_key']) && !empty($setting['cookie_name']) && !empty($setting['cookie_value'])) {
+			if (!empty($setting['url_key']) && !empty($setting['cookie_name'])) {
 				$update[$key] = array(
 					'url_key' 		=>	stripslashes($setting['url_key']),
 					'url_value'		=>	stripslashes($setting['url_value']),
@@ -143,7 +146,7 @@ function cfg2g_save_settings($settings) {
 	// Process the Remove Rows
 	if (is_array($settings['remove']) && !empty($settings['remove'])) {
 		foreach ($settings['remove'] as $key => $setting) {
-			if (!empty($setting['url_key']) && !empty($setting['cookie_name']) && !empty($setting['cookie_value'])) {
+			if (!empty($setting['url_key']) && !empty($setting['cookie_name'])) {
 				$update[$key] = array(
 					'url_key' 		=>	stripslashes($setting['url_key']),
 					'url_value'		=>	stripslashes($setting['url_value']),
@@ -360,7 +363,7 @@ function cfg2g_table_item($key, $type, $args = array()) {
 		<td>
 			'.__('Key*: ', 'cf-get2cookie').'<input type="text" name="cfg2g['.$type.']['.$key.'][cookie_name]" id="cfg2g_'.$key.'_cookie_name" value="'.attribute_escape($cookie_name).'" class="widefat" />
 			<br />
-			'.__('Value*: ', 'cf-get2cookie').'<input type="text" name="cfg2g['.$type.']['.$key.'][cookie_value]" id="cfg2g_'.$key.'_cookie_value" value="'.attribute_escape($cookie_value).'" class="widefat" />
+			'.__('Value: ', 'cf-get2cookie').'<input type="text" name="cfg2g['.$type.']['.$key.'][cookie_value]" id="cfg2g_'.$key.'_cookie_value" value="'.attribute_escape($cookie_value).'" class="widefat" />
 		</td>
 		<td style="vertical-align:middle;">
 			<textarea name="cfg2g['.$type.']['.$key.'][description]" id="cfg2g_'.$key.'_description" class="widefat">'.$description.'</textarea>
